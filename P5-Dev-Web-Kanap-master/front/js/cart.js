@@ -31,6 +31,7 @@ function addProductToHTML(product,item){
   article.className ='cart__item';
   article.dataset.id = item.id;
   article.dataset.color = item.color;
+  article.dataset.price = item.price;
   
   const cart__item__img = document.createElement('div');
   cart__item__img.className = 'cart__item__img';
@@ -90,6 +91,26 @@ async function initCartProducts(){
     initForm();
 }
 init();
+
+// Calcule du panier //
+document.addEventListener('DOMContentLoaded', function ShowSold() {
+    const totalQuantity = document.getElementById('totalQuantity') ;
+    const totalPrice = document.getElementById('totalPrice') ;
+    const rowSold = document.getElementById('cart').querySelectorAll('item.price');
+    const total = getTotal(rowSold); // total here
+  }, false);
+   
+  getTotal(array) {
+    let total = 0;
+       
+    array.forEach((row) => {
+      let value = Number(row.querySelector('totalPrice').innerText);
+      total += value;
+    });
+       
+    return total;
+  }
+
 
 // Ajouter information formulaire //
 function initForm(){
