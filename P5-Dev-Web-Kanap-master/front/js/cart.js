@@ -27,7 +27,6 @@ function removeProductHTML(article){
 }
 
 function addProductToHTML(product,item){
-   
   const article = document.createElement('article');
   article.className ='cart__item';
   article.dataset.id = item.id;
@@ -75,40 +74,108 @@ function addProductToHTML(product,item){
     })
 }
 
-async function init() {
+async function initCartProducts(){
     const cart = getCart();
     const datas = await Promise.all(cart.map(async item => {
         const product = await getProductById(item.id);
-        return {
-            item, product
-        }
+        return {item, product}
     }));
 
     for (const data of datas){
         addProductToHTML(data.product, data.item);
     }
-
-    getForm(addEventListener);
 }
-
+ function init() {
+    initCartProducts();
+    initForm();
+}
 init();
 
 // Ajouter information formulaire //
+function initForm(){
+    const form = document.querySelector('form.cart__order__form');
+    console.log('initForm', form);
+    form.addEventListener('submit', (event) => {
+        console.log('submit', event);
+        event.preventDefault();
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const address = document.getElementById('address').value;
+        const city = document.getElementById('city').value;
+        const email = document.getElementById('email').value;
+        const contact = { firstName,lastName,address,city,email };
 
-function getForm(){
-    const form = document.querySelector('.cart__order__form');
-
-    form.addEventListener('submit', () => {
-        const info = ;
-        if{
-
-        }else{
-            alert('')
+        if(!validForm(contact)){
+            return false;
         }
-    })
+
+        buyCart(getCart(),contact);
+       
+    }
+   )   
+}
+function buildFormData(formData, data, parentKey) {
+    if (data && typeof data === 'object' && !(data instanceof Date) && !(data instanceof File)) {
+      Object.keys(data).forEach(key => {
+        buildFormData(formData, data[key], parentKey ? `${parentKey}[${key}]` : key);
+      });
+    } else {
+      const value = data == null ? '' : data;
+  
+      formData.append(parentKey, value);
+    }
+  }
+  
+  function jsonToFormData(data) {
+    const formData = new FormData();
     
+    buildFormData(formData, data);
+    
+    return formData;
+  }
+  
+async function buyCart(cart,contact){
+    try{
+        const response = await fetch(`http://localhost:3000/api/products/order`,{method:'post',headers:{"content-type":"application/x-www-form-urlencoded"}, body:jsonToFormDatas({contact,products:cart})});
+        console.log(response);
+        if(response.statusCode == 200){
+            redirectToConfirmation();
+        }else{ alert("une erreur s'est produit");}
+        
+    }catch(e){
+        console.error(e);
+        alert("une erreur s'est produit");
+    }
+   
 }
 
-function validForm(){
+function validForm({firstName,lastName,address,city,email}){
+    let  isValide = true ;
+
+    if(!/^[\w\.\d]+@[\w\d]+\.[\w]+$/.test(email)){
+        document.getElementById('emailErrorMsg').innerHTML="invalide";
+        isValide = false;
+    }
+    if(!/^\w+$/.test(firstName)){
+        document.getElementById('firstNameErrorMsg').innerHTML="invalide";
+        isValide = false;
+    }
+    if(!/^\w+$/.test(lastName)){
+        document.getElementById('lastNameErrorMsg').innerHTML="invalide";
+        isValide = false;
+    }
+    if(!/^\w+$/.test(address)){
+        document.getElementById('addressErrorMsg').innerHTML="invalide";
+        isValide = false;
+    }
+    if(!/^\w+$/.test(city)){
+        document.getElementById('cityErrorMsg').innerHTML="invalide";
+        isValide = false;
+    }
+    return isValide
 
 }
+
+function redirectToConfirmation() {
+    window.location.href = "confirmation.html";
+  }

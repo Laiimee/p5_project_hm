@@ -107,7 +107,6 @@ function refreshCart(cart){
 // Ajout dans le storage
 function addToCart(item) {
   const cart = getCart();
-  
   const product = cart.find(element => {
       return element.id == item.id && element.color == item.color;
   });
