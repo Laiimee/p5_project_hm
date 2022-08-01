@@ -31,7 +31,6 @@ function addProductToHTML(product,item){
   article.className ='cart__item';
   article.dataset.id = item.id;
   article.dataset.color = item.color;
-  article.dataset.price = item.price;
   
   const cart__item__img = document.createElement('div');
   cart__item__img.className = 'cart__item__img';
@@ -93,23 +92,60 @@ async function initCartProducts(){
 init();
 
 // Calcule du panier //
-document.addEventListener('DOMContentLoaded', function ShowSold() {
-    const totalQuantity = document.getElementById('totalQuantity') ;
-    const totalPrice = document.getElementById('totalPrice') ;
+/* document.addEventListener('item.price', function ShowSold() {
+    const quantity = ;
+    const price = ;
+    const totalQuantity = document.getElementById('#totalQuantity') ;
+    const totalPrice = document.getElementById('#totalPrice') ;
+    
     const rowSold = document.getElementById('cart').querySelectorAll('item.price');
     const total = getTotal(rowSold); // total here
   }, false);
    
-  getTotal(array) {
+  getTotal(price) {
     let total = 0;
        
-    array.forEach((row) => {
-      let value = Number(row.querySelector('totalPrice').innerText);
+    price.forEach((row) => {
+      let value = Number(row.querySelector('#totalPrice').innerText);
       total += value;
     });
        
     return total;
-  }
+  } */
+
+  let count = 0;
+  let sum = 0;
+  let cart = {};
+  
+function add(event) {
+    let price = Number(product.price);
+    let id = item.id;
+
+if (id in cart) {
+    cart[id].qty++;
+} else {
+    let cartItem = {
+        price: price,
+        qty: 1
+    };
+    cart[id] = cartItem
+}
+
+    count++;
+    sum += price;
+
+    console.log(cart);
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCart();
+}
+
+function updateCart() {
+    document.getElementById("totalQuantity").textContent = sum;
+    document.getElementById("totalPrice").textContent = count;
+    localStorage.setItem("sum", sum);
+    localStorage.setItem("count", count);
+}
 
 
 // Ajouter information formulaire //
