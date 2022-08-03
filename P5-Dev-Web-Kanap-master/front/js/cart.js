@@ -86,66 +86,68 @@ async function initCartProducts(){
     }
 }
  function init() {
+
     initCartProducts();
     initForm();
 }
 init();
 
-// Calcule du panier //
-/* document.addEventListener('item.price', function ShowSold() {
-    const quantity = ;
-    const price = ;
-    const totalQuantity = document.getElementById('#totalQuantity') ;
-    const totalPrice = document.getElementById('#totalPrice') ;
+//  Calculer le panier //
+
+//input quantity
+const cartItemQuantityInput = document.createElement('input');
+cartItemQuantityInput.classList.add('itemQuantity');
+setAttributes(cartItemQuantityInput, {
+"type" : "number",
+"name" : "itemQuantity",
+"min" : "1",
+"max" : "100",
+"value" : product.quantity
+})
+cartItemQuantity.appendChild(cartItemQuantityInput);
+
+async function DataItemsCart(){
+    const items = await getCart();
+    const productsOfCart = [];
+
+    calculateTotals(productsOfCart);
+
+    const inputField = document.querySelectorAll('.itemQuantity');
+    updateTotals(inputField, productsOfCart);
+
     
-    const rowSold = document.getElementById('cart').querySelectorAll('item.price');
-    const total = getTotal(rowSold); // total here
-  }, false);
-   
-  getTotal(price) {
-    let total = 0;
-       
-    price.forEach((row) => {
-      let value = Number(row.querySelector('#totalPrice').innerText);
-      total += value;
-    });
-       
-    return total;
-  } */
+    const deleteItemBtn = document.querySelectorAll('.deleteItem');
+    const sectionOfCartItems = document.getElementById('cart__items');
+    const articleCartItem = document.querySelectorAll('.cart__item');
+    deleteItemFromTheCart(deleteItemBtn,productsOfCart, sectionOfCartItems, articleCartItem); 
+}
+DataItemsCart ();
 
-  let count = 0;
-  let sum = 0;
-  let cart = {};
-  
-function add(event) {
-    let price = Number(product.price);
-    let id = item.id;
-
-if (id in cart) {
-    cart[id].qty++;
-} else {
-    let cartItem = {
-        price: price,
-        qty: 1
-    };
-    cart[id] = cartItem
+// calcul du nombre d'article total et du prix total
+function calculateTotals(cart) {
+    const totalQuantityOfArticles = document.getElementById('totalQuantity');
+    const totalPriceOfArticles = document.getElementById('totalPrice');
+    totalQuantityOfArticles.innerText = calculateQuantity(productsOfCart);
+    totalPriceOfArticles.innerText = calculateTotalPrice(productsOfCart);
 }
 
-    count++;
-    sum += price;
-
-    console.log(cart);
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-    updateCart();
+// fonction de calcul de la quantité total
+function calculateQuantity(productsOfCart) {
+    return items.reduce((a, b) => {
+        return a + b.quantity;
+    }, 0);
+}
+// fonction de calcul du prix total
+function calculateTotalPrice(productsOfCart) {
+    //total du prix
+    return items.reduce((a, b) => {
+        return a + (b.price * b.quantity);
+    }, 0);
 }
 
-function updateCart() {
-    document.getElementById("totalQuantity").textContent = sum;
-    document.getElementById("totalPrice").textContent = count;
-    localStorage.setItem("sum", sum);
-    localStorage.setItem("count", count);
-}
+
+
+
 
 
 // Ajouter information formulaire //
