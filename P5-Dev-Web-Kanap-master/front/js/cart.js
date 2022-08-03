@@ -6,7 +6,7 @@ function getProductById(id){
 
 function refreshCart(cart){
     localStorage.setItem('cart', JSON.stringify(cart));
-  }
+}
 
 function getCart() {
     const cart = localStorage.getItem('cart');
@@ -18,7 +18,7 @@ function getCart() {
 
 function removeCartItem(article){
     let cart = getCart();
-    cart = cart.filter(item => item.id !== article.dataset.id || item.color !==  article.dataset.color); 
+    cart = cart.filter(item => item.id !== article.dataset.id || item.color !==  article.dataset.color || item.quantity !== article.dataset.quantity); 
     refreshCart(cart);
 }
 
@@ -26,7 +26,9 @@ function removeProductHTML(article){
     article.remove();
 }
 
-function addProductToHTML(product,item){
+function addProductToHTML(product,item,total,totalqty){
+
+  console.log(total);
   const article = document.createElement('article');
   article.className ='cart__item';
   article.dataset.id = item.id;
@@ -67,87 +69,65 @@ function addProductToHTML(product,item){
     article.append(cart__item__img);
     article.append(cart__item__content);
   document.getElementById('cart__items').append(article);
+
+
+  const totalPrice = document.getElementById('totalPrice');
+  totalPrice.innerHTML = total;
+
+  const totalQuantity = document.getElementById('totalQuantity');
+  totalQuantity.innerHTML = totalqty;
   
   deleteItem.addEventListener('click', () => {
-        removeCartItem(article);
-        removeProductHTML(article);
+        removeCartItem(article, total, totalqty);
+        removeProductHTML(article, total, totalqty);
     })
+}
+
+//  Calculer le panier & quantité //
+
+function getTotalPrice(items){
+    let totalPrice = 0; 
+    for (const item of items){
+        totalPrice += item.total;
+    }
+    return totalPrice;
+}
+
+function getTotalQuantity(items){
+    let totalQuantity = 0; 
+    for (const bloup of items){
+        totalQuantity += bloup.item.quantity;
+    }
+    console.log(totalQuantity);
+    return totalQuantity;
 }
 
 async function initCartProducts(){
     const cart = getCart();
+    console.log(cart);
+    let total = 0;
     const datas = await Promise.all(cart.map(async item => {
         const product = await getProductById(item.id);
-        return {item, product}
+        total = item.quantity * product.price;        
+        let obj = {item, product, total};
+        console.log(obj);
+        return {item, product, total}
     }));
 
+   
+    let totalItems = getTotalPrice(datas);
+    let totalqty =  getTotalQuantity(datas);
     for (const data of datas){
-        addProductToHTML(data.product, data.item);
+        addProductToHTML(data.product, data.item, totalItems, totalqty);
     }
 }
- function init() {
 
+
+ function init() {
     initCartProducts();
     initForm();
 }
 init();
-
-//  Calculer le panier //
-
-//input quantity
-const cartItemQuantityInput = document.createElement('input');
-cartItemQuantityInput.classList.add('itemQuantity');
-setAttributes(cartItemQuantityInput, {
-"type" : "number",
-"name" : "itemQuantity",
-"min" : "1",
-"max" : "100",
-"value" : product.quantity
-})
-cartItemQuantity.appendChild(cartItemQuantityInput);
-
-async function DataItemsCart(){
-    const items = await getCart();
-    const productsOfCart = [];
-
-    calculateTotals(productsOfCart);
-
-    const inputField = document.querySelectorAll('.itemQuantity');
-    updateTotals(inputField, productsOfCart);
-
-    
-    const deleteItemBtn = document.querySelectorAll('.deleteItem');
-    const sectionOfCartItems = document.getElementById('cart__items');
-    const articleCartItem = document.querySelectorAll('.cart__item');
-    deleteItemFromTheCart(deleteItemBtn,productsOfCart, sectionOfCartItems, articleCartItem); 
-}
-DataItemsCart ();
-
-// calcul du nombre d'article total et du prix total
-function calculateTotals(cart) {
-    const totalQuantityOfArticles = document.getElementById('totalQuantity');
-    const totalPriceOfArticles = document.getElementById('totalPrice');
-    totalQuantityOfArticles.innerText = calculateQuantity(productsOfCart);
-    totalPriceOfArticles.innerText = calculateTotalPrice(productsOfCart);
-}
-
-// fonction de calcul de la quantité total
-function calculateQuantity(productsOfCart) {
-    return items.reduce((a, b) => {
-        return a + b.quantity;
-    }, 0);
-}
-// fonction de calcul du prix total
-function calculateTotalPrice(productsOfCart) {
-    //total du prix
-    return items.reduce((a, b) => {
-        return a + (b.price * b.quantity);
-    }, 0);
-}
-
-
-
-
 
 
 // Ajouter information formulaire //
